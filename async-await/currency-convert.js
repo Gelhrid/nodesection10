@@ -3,17 +3,42 @@
 
 const axios = require('axios');
 
-const getExchangeRate = (from, to) => {
-  return axios.get(`http://api.fixer.io/latest?base=${from}`).then((response) => {
-    return response.data.rates[to];
-  });
-}
+// const getExchangeRate = (from, to) => {
+//   return axios.get(`http://api.fixer.io/latest?base=${from}`).then((response) => {
+//     return response.data.rates[to];
+//   });
+// }
 
-const getCountries = (currencyCode) => {
-  return axios.get(`https://restcountries.eu/rest/v2/currency/${currencyCode}`).then((response) => {
-    return response.data.map((country) => country.name);
-  });
+const getExchangeRate = async (from, to) => {
+  try {
+    const response = await axios.get(`http://api.fixer.io/latest?base=${from}`);
+    const rate = response.data.rates[to];
+    if(rate){
+      return rate;
+    } else {
+      throw new Error();
+    }
+  } catch (e) {
+      throw new Error(`Unable to get exchange rate for ${from} and ${to}.`)
+  }
+
 };
+
+const getCountries = async (currencyCode) => {
+  try{
+    const response = await axios.get(`https://restcountries.eu/rest/v2/currency/${currencyCode}`);
+    return response.data.map((country) => country.name);
+  }catch (e) {
+    throw new Error(`Unable to get countries that use ${currencyCode}`)
+  }
+
+};
+
+// const getCountries = (currencyCode) => {
+//   return axios.get(`https://restcountries.eu/rest/v2/currency/${currencyCode}`).then((response) => {
+//     return response.data.map((country) => country.name);
+//   });
+// };
 
 const convertCurrency = (from, to, amount) => {
   let countries;
@@ -37,4 +62,6 @@ const convertCurrencyAlt = async (from, to, amount) => {
 
 convertCurrencyAlt('USD', 'CAD', 100).then((status) => {
   console.log(status);
+}).catch((e) => {
+  console.log(e.message);
 })
